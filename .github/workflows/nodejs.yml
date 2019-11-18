@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [4.x, 6.x, 8.x, 10.x, 12.x]
+        node-version: [6.x, 8.x, 10.x, 12.x]
 
     steps:
     - uses: actions/checkout@v1
@@ -17,10 +17,18 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: npm install, build, and test
+    - name: npm ci and audit
+      if: ('6.x' != matrix.node-version)
       run: |
-        rm -rf node_modules/
+        npm ci
+        npm audit
+    - name: npm clean install
+      if: ('6.x' == matrix.node-version)
+      run: |
+        rm -rf node_modules
         npm install
-        npm test
+    - name: npm test
+      run: |
+        npm run test
       env:
         CI: true
